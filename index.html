@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider de Acessibilidade</title>
+    <link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Escrita Acessível com Slider</h1>
+
+        <div class="controls">
+            <label for="pressureSlider">Sensor (Slider):</label>
+            <input type="range" id="pressureSlider" min="0" max="100" value="0">
+            <span id="sliderValueDisplay">0</span>
+        </div>
+
+        <div class="mode-selection">
+            <button id="modeButton">Modo: Superior (A-M)</button>
+        </div>
+
+        <div class="letter-preview">
+            <p>Caractere Selecionado:</p>
+            <div id="currentLetterDisplay">A</div>
+        </div>
+
+        <div class="output">
+            <label for="outputText">Seu Texto:</label>
+            <textarea id="outputText" rows="10" cols="50" readonly></textarea>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

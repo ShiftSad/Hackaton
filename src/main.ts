@@ -7,6 +7,7 @@ const THRESHOLD_FOR_SPACE = 97;
 let pressureSlider: HTMLInputElement;
 let sliderValueDisplay: HTMLElement;
 let modeButton: HTMLButtonElement;
+let deleteButton: HTMLButtonElement
 let currentLetterDisplay: HTMLElement;
 let outputText: HTMLTextAreaElement;
 
@@ -57,6 +58,14 @@ function toggleMode(): void {
   updateLetterDisplay();
 }
 
+function deleteButtonClick(): void {
+  const currentText = outputText.value;
+  if (currentText.length > 0) {
+    outputText.value = currentText.slice(0, -1);
+  }
+  updateLetterDisplay();
+}
+
 function handleSliderRelease(): void {
   const charToType = currentLetterDisplay.textContent;
   if (charToType) {
@@ -77,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     "sliderValueDisplay",
   ) as HTMLElement;
   modeButton = document.getElementById("modeButton") as HTMLButtonElement;
+  deleteButton = document.getElementById("deleteButton") as HTMLButtonElement;
   currentLetterDisplay = document.getElementById(
     "currentLetterDisplay",
   ) as HTMLElement;
@@ -92,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
   pressureSlider.addEventListener("touchend", handleSliderRelease);
 
   modeButton.addEventListener("click", toggleMode);
+  deleteButton.addEventListener("click", deleteButtonClick);
 
   modeButton.textContent = `Modo: Superior (${ALPHABET_UPPER_HALF[0]}-${
     ALPHABET_UPPER_HALF[ALPHABET_UPPER_HALF.length - 1]

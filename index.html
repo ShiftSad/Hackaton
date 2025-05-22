@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slider de Acessibilidade</title>
+    <title>Slider de Acessibilidade v3</title>
     <link rel="stylesheet" href="src/style.css">
 </head>
 <body>
@@ -28,7 +28,13 @@
 
         <div class="output">
             <label for="outputText">Seu Texto:</label>
-            <textarea id="outputText" rows="10" cols="50" readonly></textarea>
+            <textarea id="outputText" rows="8" cols="50" readonly></textarea>
+        </div>
+
+        <div class="suggestion-area">
+            <p>Sugestão:</p>
+            <div id="suggestionDisplay">-</div>
+            <button id="useSuggestionButton" disabled>Usar Sugestão</button>
         </div>
     </div>
 

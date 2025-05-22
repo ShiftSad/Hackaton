@@ -2,11 +2,12 @@ body {
     font-family: sans-serif;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Alinha no topo */
+    align-items: flex-start;
     min-height: 100vh;
     background-color: #f0f0f0;
     margin: 0;
-    padding-top: 20px; /* Espaço no topo */
+    padding-top: 20px;
+    padding-bottom: 20px; /* Espaço extra no final */
 }
 
 .container {
@@ -27,7 +28,8 @@ h1 {
 .controls,
 .mode-selection,
 .letter-preview,
-.output {
+.output,
+.suggestion-area { /* Adicionado .suggestion-area */
     margin-bottom: 20px;
 }
 
@@ -51,8 +53,8 @@ input[type="range"] {
     color: #007bff;
 }
 
-button { /* Estilo geral para o botão de modo */
-    background-color: #28a745;
+button {
+    background-color: #007bff; /* Cor padrão para botões */
     color: white;
     border: none;
     padding: 10px 15px;
@@ -64,17 +66,45 @@ button { /* Estilo geral para o botão de modo */
 }
 
 button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled { /* Estilo para botão desabilitado */
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#modeButton {
+    background-color: #28a745; /* Verde */
+}
+#modeButton:hover {
     background-color: #1e7e34;
 }
 
+#deleteButton {
+    background-color: #dc3545; /* Vermelho */
+}
+#deleteButton:hover {
+    background-color: #b02a37;
+}
+
+#useSuggestionButton {
+    background-color: #ffc107; /* Amarelo */
+    color: #212529;
+}
+#useSuggestionButton:hover:not(:disabled) {
+    background-color: #e0a800;
+}
+
+
 #currentLetterDisplay {
-    font-size: 2.5em; /* Ajustado para caber "ESPAÇO" */
+    font-size: 2.5em;
     font-weight: bold;
     color: #333;
     padding: 10px;
     border: 2px solid #ddd;
     border-radius: 5px;
-    min-height: 60px; /* Para manter a altura */
+    min-height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -88,4 +118,22 @@ textarea {
     border-radius: 5px;
     box-sizing: border-box;
     font-size: 1.1em;
+}
+
+/* Estilos para a área de sugestão */
+.suggestion-area p {
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+#suggestionDisplay {
+    font-size: 1.2em;
+    color: #007bff;
+    padding: 8px;
+    border: 1px dashed #007bff;
+    border-radius: 4px;
+    min-height: 25px;
+    margin-bottom: 10px;
+    background-color: #e7f3ff;
 }

@@ -1,190 +1,208 @@
-import { loadWords } from "./words";
+interface MenuItem {
+  label: string;
+  action?: string;
+  subItems?: MenuItem[];
+  isBack?: boolean;
+  customAction?: () => void;
+}
 
-const ALPHABET_UPPER_HALF = "ABCDEFGHIJKLM";
-const ALPHABET_LOWER_HALF = "NOPQRSTUVWXYZ";
-const SPACE_CHAR_DISPLAY = "ESPAÇO";
-const SPACE_CHAR_ACTUAL = " ";
-const THRESHOLD_FOR_SPACE = 97;
+const userMenuConfig: Record<string, (string | { label: string, type: 'custom' })[]> = {
+  "Ajuda": ["Preciso ir no banheiro", "Estou com fome", "Estou com sede", "Sinto dor"],
+  "Afirmações": ["Sim", "Não", "Talvez", "Obrigado(a)"],
+  "Sentimentos": ["Estou feliz", "Estou triste", "Estou confortável", "Estou com frio/calor"],
+  "Ações": ["Ligar TV", "Música", "Ler um livro", "Abrir/Fechar janela"],
+  "Editar Texto": [
+    { label: "Apagar Última Palavra", type: "custom" },
+    { label: "Apagar Última Frase", type: "custom" },
+    { label: "Limpar Tudo", type: "custom" },
+  ],
+};
 
-let SUGGESTION_WORDS: string[] = [];
+function transformConfigToMenuItems(
+  config: Record<string, (string | { label: string, type: 'custom' })[]>
+): MenuItem[] {
+  return Object.entries(config).map(([categoryName, options]) => ({
+    label: categoryName,
+    subItems: options.map(option => {
+      if (typeof option === 'string') {
+        return { label: option, action: option };
+      } else {
+        return { label: option.label, customAction: () => handleCustomAction(option.label) };
+      }
+    }),
+  }));
+}
 
-loadWords().then(words => {
-  SUGGESTION_WORDS = words;
-  console.log(SUGGESTION_WORDS);
-}).catch(error => {
-  console.error("Erro ao carregar palavras:", error);
-});
+const mainMenuData: MenuItem[] = transformConfigToMenuItems(userMenuConfig);
 
-let pressureSlider: HTMLInputElement;
-let sliderValueDisplay: HTMLElement;
-let modeButton: HTMLButtonElement;
-let deleteButton: HTMLButtonElement;
-let currentLetterDisplay: HTMLElement;
+let menuDisplay: HTMLElement;
+let controlButton: HTMLButtonElement;
 let outputText: HTMLTextAreaElement;
-let suggestionDisplayElement: HTMLElement;
-let useSuggestionButton: HTMLButtonElement;
 
-type AlphabetMode = "upper" | "lower";
-let currentMode: AlphabetMode = "upper";
-let activeAlphabet: string = ALPHABET_UPPER_HALF;
-let currentSuggestion: string | null = null;
+let currentMenuItems: MenuItem[] = [...mainMenuData];
+let menuHistory: MenuItem[][] = [];
+let progressValue: number = 0;
+let isButtonPressed: boolean = false;
+let animationFrameId: number | null = null;
+const TARGET_DURATION_MS = 2500;
+let pressStartTime: number = 0;
 
-function updateLetterDisplay(): void {
-  if (!pressureSlider || !currentLetterDisplay || !activeAlphabet) return;
-
-  const sliderValue = parseInt(pressureSlider.value);
-  sliderValueDisplay.textContent = sliderValue.toString();
-
-  if (sliderValue >= THRESHOLD_FOR_SPACE) {
-    currentLetterDisplay.textContent = SPACE_CHAR_DISPLAY;
-  } else {
-    const maxSliderValueForLetters = THRESHOLD_FOR_SPACE - 1;
-    const maxIndex = activeAlphabet.length - 1;
-    let index = 0;
-
-    if (maxSliderValueForLetters > 0 && sliderValue <= maxSliderValueForLetters) {
-      index = Math.round(
-        (sliderValue / maxSliderValueForLetters) * maxIndex,
-      );
-    } else if (sliderValue > maxSliderValueForLetters) {
-      index = maxIndex;
-    }
-    index = Math.max(0, Math.min(index, maxIndex));
-    currentLetterDisplay.textContent = activeAlphabet[index] || "";
-  }
-}
-
-function toggleMode(): void {
-  if (currentMode === "upper") {
-    currentMode = "lower";
-    activeAlphabet = ALPHABET_LOWER_HALF;
-    modeButton.textContent = `Modo: Inferior (${ALPHABET_LOWER_HALF[0]}-${
-      ALPHABET_LOWER_HALF[ALPHABET_LOWER_HALF.length - 1]
-    })`;
-  } else {
-    currentMode = "upper";
-    activeAlphabet = ALPHABET_UPPER_HALF;
-    modeButton.textContent = `Modo: Superior (${ALPHABET_UPPER_HALF[0]}-${
-      ALPHABET_UPPER_HALF[ALPHABET_UPPER_HALF.length - 1]
-    })`;
-  }
-  updateLetterDisplay();
-}
-
-function updateSuggestion(): void {
-  const text = outputText.value;
-  const words = text.split(SPACE_CHAR_ACTUAL);
-  const currentWordFragment = words[words.length - 1];
-
-  currentSuggestion = null;
-
-  if (currentWordFragment.length > 0) {
-    // Find suggestion ignoring case, but preserve original suggestion case
-    const foundSuggestion = SUGGESTION_WORDS.find(word =>
-      word.toUpperCase().startsWith(currentWordFragment.toUpperCase()) &&
-      word.toUpperCase() !== currentWordFragment.toUpperCase()
-    );
-    if (foundSuggestion) {
-      currentSuggestion = foundSuggestion;
-    }
-  }
-
-  if (currentSuggestion) {
-    suggestionDisplayElement.textContent = currentSuggestion;
-    useSuggestionButton.disabled = false;
-  } else {
-    suggestionDisplayElement.textContent = "-";
-    useSuggestionButton.disabled = true;
-  }
-}
-
-function applySuggestion(): void {
-  if (currentSuggestion && outputText.value.length > 0) {
-    const text = outputText.value;
-    const words = text.split(SPACE_CHAR_ACTUAL);
-    words[words.length - 1] = currentSuggestion.toUpperCase();
-    outputText.value = words.join(SPACE_CHAR_ACTUAL) + SPACE_CHAR_ACTUAL;
-
-    currentSuggestion = null;
-    suggestionDisplayElement.textContent = "-";
-    useSuggestionButton.disabled = true;
-    updateSuggestion();
-  }
-}
-
-function deleteButtonClick(): void {
-  const currentText = outputText.value;
-  if (currentText.length > 0) {
-    if (currentText.endsWith(SPACE_CHAR_ACTUAL) && currentText.length > 1) {
-      const textWithoutLastSpace = currentText.slice(0, -1);
-      const words = textWithoutLastSpace.split(SPACE_CHAR_ACTUAL);
-      words.pop();
-      outputText.value = words.length > 0
-        ? words.join(SPACE_CHAR_ACTUAL) + SPACE_CHAR_ACTUAL
-        : "";
-        } else {
-      outputText.value = currentText.slice(0, -1);
-    }
-  }
-  updateLetterDisplay();
-  updateSuggestion();
-}
-
-function handleSliderRelease(): void {
-  const charToType = currentLetterDisplay.textContent;
-  if (!charToType) return;
-
-  if (charToType === SPACE_CHAR_DISPLAY) {
-    if (outputText.value.endsWith(SPACE_CHAR_ACTUAL) || outputText.value.length === 0) return;
-    outputText.value += SPACE_CHAR_ACTUAL;
-  } else {
-    outputText.value += charToType;
-  }
-
-  pressureSlider.value = "0";
-  updateLetterDisplay();
-  updateSuggestion();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  pressureSlider = document.getElementById("pressureSlider") as HTMLInputElement;
-  sliderValueDisplay = document.getElementById(
-    "sliderValueDisplay",
-  ) as HTMLElement;
-  modeButton = document.getElementById("modeButton") as HTMLButtonElement;
-  deleteButton = document.getElementById("deleteButton") as HTMLButtonElement;
-  currentLetterDisplay = document.getElementById(
-    "currentLetterDisplay",
-  ) as HTMLElement;
+function init(): void {
+  menuDisplay = document.getElementById("menuDisplay") as HTMLElement;
+  controlButton = document.getElementById("controlButton") as HTMLButtonElement;
   outputText = document.getElementById("outputText") as HTMLTextAreaElement;
-  suggestionDisplayElement = document.getElementById(
-    "suggestionDisplay",
-  ) as HTMLElement;
-  useSuggestionButton = document.getElementById(
-    "useSuggestionButton",
-  ) as HTMLButtonElement;
 
-  if (
-    !pressureSlider || !sliderValueDisplay || !modeButton || !deleteButton ||
-    !currentLetterDisplay || !outputText || !suggestionDisplayElement || !useSuggestionButton
-  ) {
-    console.error("Um ou mais elementos do DOM não foram encontrados!");
+  if (!menuDisplay || !controlButton || !outputText) {
+    console.error("Elementos essenciais do DOM não encontrados!");
     return;
   }
 
-  pressureSlider.addEventListener("input", updateLetterDisplay);
-  pressureSlider.addEventListener("mouseup", handleSliderRelease);
-  pressureSlider.addEventListener("touchend", handleSliderRelease);
+  controlButton.addEventListener("mousedown", handleButtonPress);
+  controlButton.addEventListener("mouseup", handleButtonRelease);
+  controlButton.addEventListener("mouseleave", handleButtonRelease);
+  controlButton.addEventListener("touchstart", (e) => { e.preventDefault(); handleButtonPress(); }, { passive: false });
+  controlButton.addEventListener("touchend", (e) => { e.preventDefault(); handleButtonRelease(); });
 
-  modeButton.addEventListener("click", toggleMode);
-  deleteButton.addEventListener("click", deleteButtonClick);
-  useSuggestionButton.addEventListener("click", applySuggestion);
+  renderMenu();
+  updateButtonGradient();
+}
 
-  outputText.addEventListener("input", updateSuggestion);
+function renderMenu(): void {
+  menuDisplay.innerHTML = "";
+  if (currentMenuItems.length === 0) {
+    menuDisplay.innerHTML = "<p>Nenhum item no menu.</p>";
+    return;
+  }
 
-  modeButton.textContent = `Modo: Superior (${ALPHABET_UPPER_HALF[0]}-${
-    ALPHABET_UPPER_HALF[ALPHABET_UPPER_HALF.length - 1]
-  })`;
-  updateLetterDisplay();
-  updateSuggestion();
-});
+  const numItems = currentMenuItems.length;
+  let highlightedIndex = -1;
+  if (numItems > 0) {
+    highlightedIndex = Math.floor((progressValue / 100.0001) * numItems);
+    highlightedIndex = Math.min(highlightedIndex, numItems - 1);
+  }
+
+
+  currentMenuItems.forEach((item, index) => {
+    const menuItemDiv = document.createElement("div");
+    menuItemDiv.classList.add("menu-item");
+    menuItemDiv.textContent = item.label;
+    if (index === highlightedIndex && isButtonPressed) {
+      menuItemDiv.classList.add("highlighted");
+    }
+    menuDisplay.appendChild(menuItemDiv);
+  });
+}
+
+function updateButtonGradient(): void {
+  const r = Math.round(0 + (255 * (progressValue / 100)));
+  const g = 0;
+  const b = Math.round(255 - (255 * (progressValue / 100)));
+  controlButton.style.backgroundColor = `rgb(${r},${g},${b})`;
+}
+
+function updateProgressLoop(): void {
+  if (!isButtonPressed) {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+    return;
+  }
+
+  const elapsedTime = Date.now() - pressStartTime;
+  progressValue = Math.min(100, (elapsedTime / TARGET_DURATION_MS) * 100);
+
+  updateButtonGradient();
+  renderMenu();
+
+  animationFrameId = requestAnimationFrame(updateProgressLoop);
+}
+
+function handleButtonPress(): void {
+  if (isButtonPressed) return;
+  isButtonPressed = true;
+  pressStartTime = Date.now();
+  progressValue = 0;
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  animationFrameId = requestAnimationFrame(updateProgressLoop);
+}
+
+function handleButtonRelease(): void {
+  if (!isButtonPressed) return;
+  isButtonPressed = false;
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+
+  processSelection();
+
+  progressValue = 0;
+  updateButtonGradient();
+  renderMenu();
+}
+
+function processSelection(): void {
+  if (currentMenuItems.length === 0) return;
+
+  const numItems = currentMenuItems.length;
+  let selectedIndex = Math.floor((progressValue / 100.0001) * numItems);
+  selectedIndex = Math.min(selectedIndex, numItems - 1);
+
+  const selectedItem = currentMenuItems[selectedIndex];
+
+  if (selectedItem) {
+    if (selectedItem.isBack) {
+      goBack();
+    } else if (selectedItem.action) {
+      outputText.value += selectedItem.action + "\n";
+      navigateToRootMenu();
+    } else if (selectedItem.customAction) {
+        selectedItem.customAction();
+    } else if (selectedItem.subItems) {
+      menuHistory.push([...currentMenuItems]);
+      currentMenuItems = [
+        { label: "↩ Voltar", isBack: true },
+        ...selectedItem.subItems,
+      ];
+    }
+  }
+  renderMenu();
+}
+
+function handleCustomAction(actionLabel: string): void {
+    let text = outputText.value;
+    if (actionLabel === "Apagar Última Palavra") {
+        const words = text.trim().split(/\s+/);
+        if (words.length > 0 && !(words.length === 1 && words[0] === "")) {
+            words.pop();
+            outputText.value = words.join(" ") + (words.length > 0 ? " " : "");
+        } else {
+            outputText.value = "";
+        }
+    } else if (actionLabel === "Apagar Última Frase") {
+        const sentences = text.trimEnd().split("\n");
+        if (sentences.length > 0 && !(sentences.length === 1 && sentences[0] === "")) {
+            sentences.pop();
+            outputText.value = sentences.join("\n") + (sentences.length > 0 ? "\n" : "");
+        } else {
+            outputText.value = "";
+        }
+    } else if (actionLabel === "Limpar Tudo") {
+        outputText.value = "";
+    }
+}
+
+
+function goBack(): void {
+  if (menuHistory.length > 0) {
+    currentMenuItems = menuHistory.pop() as MenuItem[];
+  } else {
+    currentMenuItems = [...mainMenuData];
+  }
+}
+
+function navigateToRootMenu(): void {
+  currentMenuItems = [...mainMenuData];
+  menuHistory = [];
+}
+
+document.addEventListener("DOMContentLoaded", init);

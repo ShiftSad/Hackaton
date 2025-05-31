@@ -57,8 +57,8 @@ function init(): void {
     return;
   }
 
-  controlButton.addEventListener("mousedown", handleButtonPress);
-  controlButton.addEventListener("mouseup", handleButtonRelease);
+  window.addEventListener("mousedown", handleButtonPress);
+  window.addEventListener("mouseup", handleButtonRelease);
   controlButton.addEventListener("mouseleave", handleButtonRelease);
   controlButton.addEventListener("touchstart", (e) => { e.preventDefault(); handleButtonPress(); }, { passive: false });
   controlButton.addEventListener("touchend", (e) => { e.preventDefault(); handleButtonRelease(); });

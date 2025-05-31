@@ -19,24 +19,24 @@ export function getAudioContext(): AudioContext | null {
 export function getFrequency(noteLetter: string, octave: number): number | null {
   let baseFrequency: number;
   switch (noteLetter.toUpperCase()) {
-    case "C":
-      baseFrequency = 261.63; // C4
+    case "A":
+      baseFrequency = 329.63; 
       break; 
+    case "B":
+      baseFrequency = 392.00;
+      break;
+    case "C":
+      baseFrequency = 493.88;
+      break;
     case "D":
-      baseFrequency = 293.66; // D4
-      break;
-    case "E":
-      baseFrequency = 329.63; // E4
-      break;
-    case "F":
-      baseFrequency = 349.23; // F4
+      baseFrequency = 587.33;
       break;
     default:
       console.error("Unknown note letter:", noteLetter);
       return null;
   }
 
-  return baseFrequency * Math.pow(2, octave - 4);
+  return baseFrequency;
 }
 
 export function playNoteSound(fullNoteName: string, duration: number = 0.5) {

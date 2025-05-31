@@ -1,90 +1,89 @@
 body {
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center; /* Centralizar verticalmente */
-    min-height: 100vh;
-    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
     margin: 0;
     padding: 20px;
-    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .container {
-    background-color: #fff;
+    background: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 500px;
-    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 h1 {
+    text-align: center;
     color: #333;
-    margin-bottom: 25px;
-    font-size: 1.8em;
+    margin-bottom: 30px;
 }
 
-#menuDisplay {
-    min-height: 150px; /* Altura mínima para visualização dos itens */
-    border: 1px solid #ddd;
-    border-radius: 5px;
+.piano {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 2px;
+    background: #333;
     padding: 10px;
-    margin-bottom: 20px;
-    background-color: #f9f9f9;
-    overflow-y: auto; /* Caso haja muitos itens */
-}
-
-.menu-item {
-    padding: 10px 8px;
-    margin: 5px 0;
-    background-color: #fff;
-    border: 1px solid #eee;
-    border-radius: 4px;
-    cursor: default;
-    font-size: 1.1em;
-    transition: background-color 0.2s, color 0.2s, transform 0.1s;
-}
-
-.menu-item.highlighted {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-    transform: scale(1.03);
-}
-
-#controlButton {
-    width: 100%;
-    padding: 15px;
-    font-size: 1.2em;
-    font-weight: bold;
-    color: white;
-    background-color: #007bff; /* Cor inicial (Azul) */
-    border: none;
     border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    transition: background-color 0.1s linear; /* Para suavizar a mudança de cor */
-    user-select: none; /* Evitar seleção de texto no botão */
-    -webkit-user-select: none;
-    -ms-user-select: none;
 }
 
-.output-area label {
-    display: block;
-    margin-bottom: 8px;
-    color: #555;
-    font-weight: bold;
-    text-align: left;
+.note-row {
+    display: contents;
 }
 
-#outputText {
-    width: 100%;
-    padding: 10px;
+.key {
+    width: 50px;
+    height: 100px;
+    background: white;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 1.1em;
-    background-color: #e9ecef;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    font-weight: bold;
+    transition: background 0.1s;
+}
+
+.key:hover {
+    background: #f0f0f0;
+}
+
+.key:active {
+    background: #ddd;
+}
+
+.note-do.active { 
+    background: #ffcdd2; 
+}
+
+.note-re.active { 
+    background: #c8e6c9; 
+}
+
+.note-mi.active { 
+    background: #ffe0b2; 
+}
+
+.note-fa.active { 
+    background: #bbdefb; 
+}
+
+.note-label {
+    margin: 20px 0 10px 0;
+    font-weight: bold;
+    color: #555;
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.selected {
+    background: #ffeb3b;
+}
+
+.selected.active {
+    background: #ff9800;
 }

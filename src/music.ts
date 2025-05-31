@@ -20,17 +20,20 @@ export function getFrequency(noteLetter: string, octave: number): number | null 
   let baseFrequency: number;
   switch (noteLetter.toUpperCase()) {
     case "A":
-      baseFrequency = 329.63; 
+      baseFrequency = 440.0; 
       break; 
-    case "B":
-      baseFrequency = 392.00;
-      break;
     case "C":
-      baseFrequency = 493.88;
+      baseFrequency = 261.6;
       break;
     case "D":
-      baseFrequency = 587.33;
+      baseFrequency = 293.6;
       break;
+    case "E":
+      baseFrequency = 329.6;
+      break;
+    case "G":
+      baseFrequency = 391.9;
+      break;  
     default:
       console.error("Unknown note letter:", noteLetter);
       return null;

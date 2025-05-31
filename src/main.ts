@@ -46,7 +46,7 @@ function addOrRemoveNote() {
 
 function changeRow() {
   keys.forEach(key => key.classList.remove('selected'));
-  currentRow = (currentRow + 1) % 4;
+  currentRow = (currentRow + 1) % 5;
   keys[currentKeyIndex + (currentRow * 10)]?.classList.add('selected');
 }
 
@@ -56,7 +56,7 @@ function startBPM() {
   const performBeatAction = () => {
     playBPMSound(); 
 
-    for (let row = 0; row < 4; row++) {
+    for (let row = 0; row < 5; row++) {
       const keyElement = keys[currentKeyIndex + row * 10];
       if (keyElement) {
         const noteToPlay = keyElement.textContent || "";
@@ -77,14 +77,28 @@ function startBPM() {
   bpmInterval = setInterval(performBeatAction, intervalTime);
 }
 
-document.addEventListener('keyup', (event) => {
-  const ctx = getAudioContext();
-  if (ctx && ctx.state === "suspended") {
-    ctx.resume().catch((e) => console.error("Error resuming AudioContext:", e));
-  }
+let spacePressed = false;
+let spacePressStartTime = 0;
 
-  if (event.key.toLowerCase() === 'c') addOrRemoveNote();
-  else if (event.key.toLowerCase() === 'l') changeRow();
+document.addEventListener('mousedown', (event) => {
+    spacePressed = true;
+    spacePressStartTime = Date.now();
+    
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === "suspended") {
+      ctx.resume().catch((e) => console.error("Error resuming AudioContext:", e));
+    }
+});
+
+document.addEventListener('mouseup', (event) => {
+    spacePressed = false;
+    const pressDuration = Date.now() - spacePressStartTime;
+    
+    if (pressDuration >= 500) { // Long press (500ms or more)
+      changeRow();
+    } else { // Short press
+      addOrRemoveNote();
+    }
 });
 
 startBPM();

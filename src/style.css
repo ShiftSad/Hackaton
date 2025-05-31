@@ -72,6 +72,14 @@ h1 {
     background: #bbdefb; 
 }
 
+.note-la.active { 
+    background: #d1c4e9; 
+}
+
+.note-sol.active { 
+    background: #f8bbd0; 
+}
+
 .note-label {
     margin: 20px 0 10px 0;
     font-weight: bold;

@@ -17,58 +17,26 @@ export function getAudioContext(): AudioContext | null {
 }
 
 export function getFrequency(noteLetter: string, octave: number): number | null {
-  let semitoneOffset: number;
+  let baseFrequency: number;
   switch (noteLetter.toUpperCase()) {
     case "C":
-      semitoneOffset = 0;
+      baseFrequency = 261.63; // C4
       break; 
-    case "C#":
-    case "DB":
-      semitoneOffset = 1;
-      break;
     case "D":
-      semitoneOffset = 2;
-      break;
-    case "D#":
-    case "EB":
-      semitoneOffset = 3;
+      baseFrequency = 293.66; // D4
       break;
     case "E":
-      semitoneOffset = 4;
+      baseFrequency = 329.63; // E4
       break;
     case "F":
-      semitoneOffset = 5;
-      break;
-    case "F#":
-    case "GB":
-      semitoneOffset = 6;
-      break;
-    case "G":
-      semitoneOffset = 7;
-      break;
-    case "G#":
-    case "AB":
-      semitoneOffset = 8;
-      break;
-    case "A":
-      semitoneOffset = 9;
-      break;
-    case "A#":
-    case "BB":
-      semitoneOffset = 10;
-      break;
-    case "B":
-      semitoneOffset = 11;
+      baseFrequency = 349.23; // F4
       break;
     default:
       console.error("Unknown note letter:", noteLetter);
       return null;
   }
 
-  // C4 = 261.63 Hz, calculate frequency using 12th root of 2
-  const c4Frequency = 261.63;
-  const totalSemitones = (octave - 4) * 12 + semitoneOffset;
-  return c4Frequency * Math.pow(2, totalSemitones / 12);
+  return baseFrequency * Math.pow(2, octave - 4);
 }
 
 export function playNoteSound(fullNoteName: string, duration: number = 0.5) {
